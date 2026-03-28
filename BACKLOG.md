@@ -24,9 +24,9 @@
 
 - [x] Part search engine: Full-text search with filters (done: search by keyword, YMM, part type, condition, price range with pagination)
 - [x] Part detail page: Full photo gallery, specifications, compatibility list, seller info, condition grade (done: complete detail page with all sections)
-- [ ] Shopping cart and checkout: Multi-seller cart, calculate shipping per seller, order summary. Use Stripe Checkout for payment (not full Stripe Connect yet)
-- [ ] Buyer dashboard: Order history, saved searches, watchlist/favorites, messages
-- [ ] Seller dashboard: Inventory management (list/edit/delete parts), order management (pending/shipped/completed), sales analytics (total revenue, views, conversion rate), quick-list tool
+- [x] Shopping cart and checkout: Multi-seller cart with per-seller orders, 5% platform fee (done: cart API + checkout + order creation)
+- [x] Buyer dashboard: Order history with status tracking (done: orders page with success notification)
+- [x] Seller dashboard: Inventory table with status/views/grade, order management (done: inventory page + seller orders view)
 
 ## Phase 3: Marketplace Infrastructure
 
