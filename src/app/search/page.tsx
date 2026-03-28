@@ -59,9 +59,34 @@ export default function SearchPage() {
     fetchResults();
   }, [fetchResults]);
 
-  function handleSearch(e: React.FormEvent) {
+  async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     setPage(1);
+
+    // If query looks like natural language (more than 3 words), use AI parsing
+    if (q.trim().split(/\s+/).length >= 3) {
+      try {
+        const aiRes = await fetch("/api/ai/smart-search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: q }),
+        });
+        if (aiRes.ok) {
+          const parsed = await aiRes.json();
+          if (parsed.year) setYear(parsed.year);
+          if (parsed.make) setMake(parsed.make);
+          if (parsed.model) setModel(parsed.model);
+          if (parsed.partType) setPartType(parsed.partType);
+          if (parsed.conditionGrade) setConditionGrade(parsed.conditionGrade);
+          if (parsed.minPrice) setMinPrice(parsed.minPrice);
+          if (parsed.maxPrice) setMaxPrice(parsed.maxPrice);
+          if (parsed.q) setQ(parsed.q);
+        }
+      } catch {
+        // Fall through to regular search
+      }
+    }
+
     fetchResults();
   }
 

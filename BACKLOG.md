@@ -45,7 +45,7 @@ FOLLOW-UP: Watchlist and saved searches APIs + UI (done: watchlist page, saved s
 - [ ] Advanced AI pricing engine: Build ML model trained on marketplace transaction data + eBay sold data. Factor in: part type, condition, supply/demand in region, seasonal trends, vehicle popularity. Show "market value" badge on fairly-priced parts
 - [ ] AI condition assessment: Computer vision model that analyzes part photos to: detect scratches/dents/rust/cracks, measure damage area (credit-card-unit system), auto-suggest A/B/C grade with confidence score, flag misrepresented conditions
 - [ ] Part interchange database: Build compatibility database mapping interchangeable parts across vehicles. Start with crowdsourced data + AI extraction from repair manuals. Show "also fits" on listings
-- [ ] Smart search with natural language: Allow buyers to search in plain English: "driver side headlight for 2018 Honda Civic" or "transmission that fits my car" (with saved vehicle). AI parses intent and returns relevant results
+- [x] Smart search with natural language: AI parses natural language queries into structured filters (done: /api/ai/smart-search + auto-fill filters on search page)
 
 ## Phase 5: Growth & Operations
 
