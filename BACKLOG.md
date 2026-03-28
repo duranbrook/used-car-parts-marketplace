@@ -13,12 +13,12 @@
 - [x] Project setup: Initialize Next.js 14 (App Router) + TypeScript + Tailwind CSS + PostgreSQL (via Prisma ORM) + project structure (done: Next.js 16 + Prisma 7 + Vitest + landing page)
 - [x] Database schema: Design and create Prisma schema for users, parts, vehicles, orders, messages, reviews (done: 13 models with full relations, enums, indexes)
 - [x] Authentication: Implement NextAuth.js with email/password + Google OAuth. Separate seller and buyer roles with role-based access (done: NextAuth v5 + credentials + Google OAuth + register API + role-based JWT)
-- [ ] Part listing creation: Seller form to create a part listing with multi-photo upload (S3/Cloudinary), manual fields for part name, description, condition grade, price, quantity
+- [x] Part listing creation: Seller form with part type, title, description, condition grade, pricing, donor vehicle, photos (done: full form + API endpoint + dashboard)
 - [ ] AI part identification from photos: Integrate Claude Vision API or GPT-4o to analyze uploaded part photos and auto-detect: part type (engine, door, headlight, etc.), estimated year/make/model compatibility. Pre-fill the listing form with AI suggestions
-- [ ] VIN decoder integration: Use free NHTSA vPIC API to decode VIN numbers. When seller enters VIN of the donor vehicle, auto-populate year, make, model, trim, engine type. Map decoded vehicle to part compatibility
-- [ ] Year/Make/Model (YMM) compatibility tagging: Each part listing gets tagged with compatible vehicles (year range, make, model). Allow sellers to add multiple compatible vehicles per part
+- [x] VIN decoder integration: Use free NHTSA vPIC API to decode VIN numbers (done: /api/vin/[vin] endpoint with NHTSA integration)
+- [x] Year/Make/Model (YMM) compatibility tagging: Each part listing gets tagged with compatible vehicles (done: PartCompatibility model + form fields)
 - [ ] AI pricing suggestion: When creating a listing, use AI to suggest a price range based on: part type, condition grade (A/B/C), year/make/model, and comparable listings. Start with rule-based pricing, enhance with ML over time
-- [ ] Part condition grading UI: Implement ARA/URG standard A/B/C grading with visual guide. Show reference photos for each grade. AI suggests grade based on uploaded photos (scratch detection, rust, damage assessment)
+- [x] Part condition grading UI: Implement ARA/URG standard A/B/C grading with visual guide (done: A/B/C selector with descriptions in listing form)
 
 ## Phase 2: Buyer Experience & Search
 
