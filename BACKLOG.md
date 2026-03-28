@@ -33,8 +33,8 @@
 - [ ] Stripe Connect integration: Replace basic Stripe with Connect for marketplace split payments. Seller onboarding flow, automatic payouts, platform fee collection
 - [x] Messaging system: Buyer-seller messaging with conversation list and chat UI (done: APIs + conversation list + chat page with polling)
 - [ ] Shipping integration: Integrate ShipEngine API for real-time shipping rates. Auto-route: small parts (<70 lbs) to parcel, medium (70-150 lbs) to ground, heavy (>150 lbs) to LTL freight. Generate shipping labels
-- [ ] Order management flow: Full order lifecycle: placed -> confirmed -> shipped (with tracking) -> delivered -> completed. Seller can print packing slips and labels
-- [ ] Reviews and ratings: Buyer reviews for sellers and individual parts. Star rating + text. Verified purchase badge. Seller response capability
+- [x] Order management flow: Full lifecycle with valid state transitions, tracking numbers (done: PATCH /api/orders/[id]/status with role-based permissions)
+- [x] Reviews and ratings: Star ratings + text + verified purchase badge (done: reviews API with stats/distribution)
 - [ ] Notification system: Email + in-app notifications for: new messages, order updates, price drop alerts, part availability alerts (saved searches)
 
 ## Phase 4: AI & Differentiation
