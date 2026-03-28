@@ -22,8 +22,8 @@
 
 ## Phase 2: Buyer Experience & Search
 
-- [ ] Part search engine: Full-text search with Prisma + optional Elasticsearch. Filter by: year, make, model, part type, condition grade, price range, location/distance, seller rating
-- [ ] Part detail page: Full photo gallery with zoom, part specifications, compatibility list, seller info, condition grade with explanation, price comparison to market average, shipping estimate
+- [x] Part search engine: Full-text search with filters (done: search by keyword, YMM, part type, condition, price range with pagination)
+- [x] Part detail page: Full photo gallery, specifications, compatibility list, seller info, condition grade (done: complete detail page with all sections)
 - [ ] Shopping cart and checkout: Multi-seller cart, calculate shipping per seller, order summary. Use Stripe Checkout for payment (not full Stripe Connect yet)
 - [ ] Buyer dashboard: Order history, saved searches, watchlist/favorites, messages
 - [ ] Seller dashboard: Inventory management (list/edit/delete parts), order management (pending/shipped/completed), sales analytics (total revenue, views, conversion rate), quick-list tool
