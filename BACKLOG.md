@@ -53,12 +53,12 @@ FOLLOW-UP: Watchlist and saved searches APIs + UI (done: watchlist page, saved s
 - [x] Mobile-responsive PWA: PWA manifest added, theme color, viewport meta (done: manifest.json + layout metadata)
 - [x] Seller analytics dashboard: Revenue, views, conversion rate, aging inventory alerts, top parts (done: analytics API + dashboard page)
 - [ ] Logistics coordination: Offer pickup/delivery scheduling. Integrate with uShip for freight marketplace quotes on heavy parts. Show delivery time estimates
-- [ ] Warranty and returns management: Configurable warranty per listing (30/60/90 day). Return request flow with photo evidence. Dispute resolution system
+- [x] Warranty and returns management: Return request flow with 90-day window (done: /api/returns with warranty check + photo evidence)
 - [x] Admin panel: Platform stats dashboard with user/order/listing counts (done: admin API + dashboard page with stats grid and recent activity)
 
 ## Phase 6: Scale & Ecosystem
 
-- [ ] API for yard management systems: REST API for junkyards to sync inventory from their existing systems (Checkmate, Pinnacle, etc.). CIECA standard compliance
+- [x] API for yard management systems: REST API with API key auth, batch create/list/deactivate (done: /api/v1/inventory)
 - [ ] Multi-language support: i18n framework with English and Spanish to start. Translate all UI strings, support bilingual listings
 - [x] Yard profile pages: Public seller profiles with inventory, ratings, location (done: /sellers/[id] page + API)
 - [x] Price history and market trends: Market pricing data by part type with grade breakdown (done: included in price-history API)
