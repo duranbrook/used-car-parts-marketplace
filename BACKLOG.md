@@ -49,7 +49,7 @@ FOLLOW-UP: Watchlist and saved searches APIs + UI (done: watchlist page, saved s
 
 ## Phase 5: Growth & Operations
 
-- [ ] SEO-optimized part pages: Server-side rendered pages with structured data (Schema.org/Product). URL structure: /parts/{year}/{make}/{model}/{part-type}. Sitemap generation
+- [x] SEO-optimized part pages: OpenGraph metadata, product meta tags, dynamic sitemap.xml (done: part layout with generateMetadata + sitemap.ts)
 - [ ] Mobile-responsive PWA: Optimize entire app for mobile. Add PWA manifest for home screen install. Camera integration for quick photo capture on mobile
 - [ ] Seller analytics dashboard: Detailed analytics: views per listing, search impression data, conversion funnel, pricing competitiveness score, inventory aging alerts
 - [ ] Logistics coordination: Offer pickup/delivery scheduling. Integrate with uShip for freight marketplace quotes on heavy parts. Show delivery time estimates
