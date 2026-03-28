@@ -39,7 +39,7 @@
 
 ## Phase 4: AI & Differentiation
 
-- [ ] Bulk listing from vehicle: Seller enters VIN or selects vehicle, system shows all common harvestable parts for that vehicle. Seller checks off which parts they have, uploads batch photos, AI pre-fills all listings at once
+- [x] Bulk listing from vehicle: VIN decode + AI generates all harvestable parts with pricing per grade (done: bulk listing page with select/deselect, grade picker, batch creation)
 - [ ] Advanced AI pricing engine: Build ML model trained on marketplace transaction data + eBay sold data. Factor in: part type, condition, supply/demand in region, seasonal trends, vehicle popularity. Show "market value" badge on fairly-priced parts
 - [ ] AI condition assessment: Computer vision model that analyzes part photos to: detect scratches/dents/rust/cracks, measure damage area (credit-card-unit system), auto-suggest A/B/C grade with confidence score, flag misrepresented conditions
 - [ ] Part interchange database: Build compatibility database mapping interchangeable parts across vehicles. Start with crowdsourced data + AI extraction from repair manuals. Show "also fits" on listings
