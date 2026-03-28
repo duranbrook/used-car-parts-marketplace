@@ -10,9 +10,9 @@
 
 ## Phase 1: Foundation & Core MVP
 
-- [ ] Project setup: Initialize Next.js 14 (App Router) + TypeScript + Tailwind CSS + PostgreSQL (via Prisma ORM) + project structure (src/app, src/lib, src/components, src/services)
-- [ ] Database schema: Design and create Prisma schema for users, parts, vehicles, orders, messages, reviews. Include Hollander interchange number field, condition grade (A/B/C), and pricing fields
-- [ ] Authentication: Implement NextAuth.js with email/password + Google OAuth. Separate seller and buyer roles with role-based access
+- [x] Project setup: Initialize Next.js 14 (App Router) + TypeScript + Tailwind CSS + PostgreSQL (via Prisma ORM) + project structure (done: Next.js 16 + Prisma 7 + Vitest + landing page)
+- [x] Database schema: Design and create Prisma schema for users, parts, vehicles, orders, messages, reviews (done: 13 models with full relations, enums, indexes)
+- [x] Authentication: Implement NextAuth.js with email/password + Google OAuth. Separate seller and buyer roles with role-based access (done: NextAuth v5 + credentials + Google OAuth + register API + role-based JWT)
 - [ ] Part listing creation: Seller form to create a part listing with multi-photo upload (S3/Cloudinary), manual fields for part name, description, condition grade, price, quantity
 - [ ] AI part identification from photos: Integrate Claude Vision API or GPT-4o to analyze uploaded part photos and auto-detect: part type (engine, door, headlight, etc.), estimated year/make/model compatibility. Pre-fill the listing form with AI suggestions
 - [ ] VIN decoder integration: Use free NHTSA vPIC API to decode VIN numbers. When seller enters VIN of the donor vehicle, auto-populate year, make, model, trim, engine type. Map decoded vehicle to part compatibility
