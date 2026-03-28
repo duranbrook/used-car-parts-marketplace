@@ -1,0 +1,63 @@
+# Used Car Parts Marketplace — Backlog
+
+<!--
+  PRIORITY ORDER: Top = highest priority. AI loop picks the top unchecked item.
+  After completing, check off with [x] and add a completion note.
+  BUG: prefix = hotfix, goes to top.
+  FOLLOW-UP: prefix = discovered during implementation.
+  RESEARCH: prefix = needs web research before implementation.
+-->
+
+## Phase 1: Foundation & Core MVP
+
+- [ ] Project setup: Initialize Next.js 14 (App Router) + TypeScript + Tailwind CSS + PostgreSQL (via Prisma ORM) + project structure (src/app, src/lib, src/components, src/services)
+- [ ] Database schema: Design and create Prisma schema for users, parts, vehicles, orders, messages, reviews. Include Hollander interchange number field, condition grade (A/B/C), and pricing fields
+- [ ] Authentication: Implement NextAuth.js with email/password + Google OAuth. Separate seller and buyer roles with role-based access
+- [ ] Part listing creation: Seller form to create a part listing with multi-photo upload (S3/Cloudinary), manual fields for part name, description, condition grade, price, quantity
+- [ ] AI part identification from photos: Integrate Claude Vision API or GPT-4o to analyze uploaded part photos and auto-detect: part type (engine, door, headlight, etc.), estimated year/make/model compatibility. Pre-fill the listing form with AI suggestions
+- [ ] VIN decoder integration: Use free NHTSA vPIC API to decode VIN numbers. When seller enters VIN of the donor vehicle, auto-populate year, make, model, trim, engine type. Map decoded vehicle to part compatibility
+- [ ] Year/Make/Model (YMM) compatibility tagging: Each part listing gets tagged with compatible vehicles (year range, make, model). Allow sellers to add multiple compatible vehicles per part
+- [ ] AI pricing suggestion: When creating a listing, use AI to suggest a price range based on: part type, condition grade (A/B/C), year/make/model, and comparable listings. Start with rule-based pricing, enhance with ML over time
+- [ ] Part condition grading UI: Implement ARA/URG standard A/B/C grading with visual guide. Show reference photos for each grade. AI suggests grade based on uploaded photos (scratch detection, rust, damage assessment)
+
+## Phase 2: Buyer Experience & Search
+
+- [ ] Part search engine: Full-text search with Prisma + optional Elasticsearch. Filter by: year, make, model, part type, condition grade, price range, location/distance, seller rating
+- [ ] Part detail page: Full photo gallery with zoom, part specifications, compatibility list, seller info, condition grade with explanation, price comparison to market average, shipping estimate
+- [ ] Shopping cart and checkout: Multi-seller cart, calculate shipping per seller, order summary. Use Stripe Checkout for payment (not full Stripe Connect yet)
+- [ ] Buyer dashboard: Order history, saved searches, watchlist/favorites, messages
+- [ ] Seller dashboard: Inventory management (list/edit/delete parts), order management (pending/shipped/completed), sales analytics (total revenue, views, conversion rate), quick-list tool
+
+## Phase 3: Marketplace Infrastructure
+
+- [ ] Stripe Connect integration: Replace basic Stripe with Connect for marketplace split payments. Seller onboarding flow, automatic payouts, platform fee collection
+- [ ] Messaging system: Real-time buyer-seller messaging per listing. Include photo sharing in messages, negotiate price, arrange pickup. Use WebSocket or Pusher
+- [ ] Shipping integration: Integrate ShipEngine API for real-time shipping rates. Auto-route: small parts (<70 lbs) to parcel, medium (70-150 lbs) to ground, heavy (>150 lbs) to LTL freight. Generate shipping labels
+- [ ] Order management flow: Full order lifecycle: placed -> confirmed -> shipped (with tracking) -> delivered -> completed. Seller can print packing slips and labels
+- [ ] Reviews and ratings: Buyer reviews for sellers and individual parts. Star rating + text. Verified purchase badge. Seller response capability
+- [ ] Notification system: Email + in-app notifications for: new messages, order updates, price drop alerts, part availability alerts (saved searches)
+
+## Phase 4: AI & Differentiation
+
+- [ ] Bulk listing from vehicle: Seller enters VIN or selects vehicle, system shows all common harvestable parts for that vehicle. Seller checks off which parts they have, uploads batch photos, AI pre-fills all listings at once
+- [ ] Advanced AI pricing engine: Build ML model trained on marketplace transaction data + eBay sold data. Factor in: part type, condition, supply/demand in region, seasonal trends, vehicle popularity. Show "market value" badge on fairly-priced parts
+- [ ] AI condition assessment: Computer vision model that analyzes part photos to: detect scratches/dents/rust/cracks, measure damage area (credit-card-unit system), auto-suggest A/B/C grade with confidence score, flag misrepresented conditions
+- [ ] Part interchange database: Build compatibility database mapping interchangeable parts across vehicles. Start with crowdsourced data + AI extraction from repair manuals. Show "also fits" on listings
+- [ ] Smart search with natural language: Allow buyers to search in plain English: "driver side headlight for 2018 Honda Civic" or "transmission that fits my car" (with saved vehicle). AI parses intent and returns relevant results
+
+## Phase 5: Growth & Operations
+
+- [ ] SEO-optimized part pages: Server-side rendered pages with structured data (Schema.org/Product). URL structure: /parts/{year}/{make}/{model}/{part-type}. Sitemap generation
+- [ ] Mobile-responsive PWA: Optimize entire app for mobile. Add PWA manifest for home screen install. Camera integration for quick photo capture on mobile
+- [ ] Seller analytics dashboard: Detailed analytics: views per listing, search impression data, conversion funnel, pricing competitiveness score, inventory aging alerts
+- [ ] Logistics coordination: Offer pickup/delivery scheduling. Integrate with uShip for freight marketplace quotes on heavy parts. Show delivery time estimates
+- [ ] Warranty and returns management: Configurable warranty per listing (30/60/90 day). Return request flow with photo evidence. Dispute resolution system
+- [ ] Admin panel: Platform admin dashboard: user management, listing moderation, reported content review, platform analytics, fee configuration
+
+## Phase 6: Scale & Ecosystem
+
+- [ ] API for yard management systems: REST API for junkyards to sync inventory from their existing systems (Checkmate, Pinnacle, etc.). CIECA standard compliance
+- [ ] Multi-language support: i18n framework with English and Spanish to start. Translate all UI strings, support bilingual listings
+- [ ] Yard profile pages: Public junkyard profile with: inventory count, location/map, hours, ratings, specialties (e.g., "Japanese imports", "trucks"), verified badge
+- [ ] Price history and market trends: Show price trend charts for common parts. "Average selling price for [part] over last 90 days." Help sellers price competitively
+- [ ] Saved vehicle garage: Buyers save their vehicles. All search results auto-filter to compatible parts. "Parts for your 2018 Civic" personalized homepage

@@ -1,0 +1,9 @@
+node_modules/
+.next/
+.env
+.env.local
+.auto-dev-logs/
+CURRENT_TASK.md
+*.log
+dist/
+.DS_Store
