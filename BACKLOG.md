@@ -37,6 +37,8 @@
 - [x] Reviews and ratings: Star ratings + text + verified purchase badge (done: reviews API with stats/distribution)
 - [ ] Notification system: Email + in-app notifications for: new messages, order updates, price drop alerts, part availability alerts (saved searches)
 
+FOLLOW-UP: Watchlist and saved searches APIs + UI (done: watchlist page, saved searches API, add/remove from watchlist)
+
 ## Phase 4: AI & Differentiation
 
 - [x] Bulk listing from vehicle: VIN decode + AI generates all harvestable parts with pricing per grade (done: bulk listing page with select/deselect, grade picker, batch creation)
