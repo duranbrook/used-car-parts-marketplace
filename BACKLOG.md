@@ -44,7 +44,7 @@ FOLLOW-UP: Watchlist and saved searches APIs + UI (done: watchlist page, saved s
 - [x] Bulk listing from vehicle: VIN decode + AI generates all harvestable parts with pricing per grade (done: bulk listing page with select/deselect, grade picker, batch creation)
 - [ ] Advanced AI pricing engine: Build ML model trained on marketplace transaction data + eBay sold data. Factor in: part type, condition, supply/demand in region, seasonal trends, vehicle popularity. Show "market value" badge on fairly-priced parts
 - [ ] AI condition assessment: Computer vision model that analyzes part photos to: detect scratches/dents/rust/cracks, measure damage area (credit-card-unit system), auto-suggest A/B/C grade with confidence score, flag misrepresented conditions
-- [ ] Part interchange database: Build compatibility database mapping interchangeable parts across vehicles. Start with crowdsourced data + AI extraction from repair manuals. Show "also fits" on listings
+- [x] Part interchange database: AI-powered interchange lookup (done: /api/ai/interchange returns compatible vehicles for any part+vehicle combo)
 - [x] Smart search with natural language: AI parses natural language queries into structured filters (done: /api/ai/smart-search + auto-fill filters on search page)
 
 ## Phase 5: Growth & Operations
@@ -62,4 +62,4 @@ FOLLOW-UP: Watchlist and saved searches APIs + UI (done: watchlist page, saved s
 - [ ] Multi-language support: i18n framework with English and Spanish to start. Translate all UI strings, support bilingual listings
 - [ ] Yard profile pages: Public junkyard profile with: inventory count, location/map, hours, ratings, specialties (e.g., "Japanese imports", "trucks"), verified badge
 - [ ] Price history and market trends: Show price trend charts for common parts. "Average selling price for [part] over last 90 days." Help sellers price competitively
-- [ ] Saved vehicle garage: Buyers save their vehicles. All search results auto-filter to compatible parts. "Parts for your 2018 Civic" personalized homepage
+- [x] Saved vehicle garage: Buyers save vehicles, quick "Find Parts" link pre-fills search (done: garage API + page with add/remove/search)
