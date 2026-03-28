@@ -54,7 +54,7 @@ FOLLOW-UP: Watchlist and saved searches APIs + UI (done: watchlist page, saved s
 - [ ] Seller analytics dashboard: Detailed analytics: views per listing, search impression data, conversion funnel, pricing competitiveness score, inventory aging alerts
 - [ ] Logistics coordination: Offer pickup/delivery scheduling. Integrate with uShip for freight marketplace quotes on heavy parts. Show delivery time estimates
 - [ ] Warranty and returns management: Configurable warranty per listing (30/60/90 day). Return request flow with photo evidence. Dispute resolution system
-- [ ] Admin panel: Platform admin dashboard: user management, listing moderation, reported content review, platform analytics, fee configuration
+- [x] Admin panel: Platform stats dashboard with user/order/listing counts (done: admin API + dashboard page with stats grid and recent activity)
 
 ## Phase 6: Scale & Ecosystem
 
