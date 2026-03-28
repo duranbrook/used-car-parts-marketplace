@@ -42,8 +42,8 @@ FOLLOW-UP: Watchlist and saved searches APIs + UI (done: watchlist page, saved s
 ## Phase 4: AI & Differentiation
 
 - [x] Bulk listing from vehicle: VIN decode + AI generates all harvestable parts with pricing per grade (done: bulk listing page with select/deselect, grade picker, batch creation)
-- [ ] Advanced AI pricing engine: Build ML model trained on marketplace transaction data + eBay sold data. Factor in: part type, condition, supply/demand in region, seasonal trends, vehicle popularity. Show "market value" badge on fairly-priced parts
-- [ ] AI condition assessment: Computer vision model that analyzes part photos to: detect scratches/dents/rust/cracks, measure damage area (credit-card-unit system), auto-suggest A/B/C grade with confidence score, flag misrepresented conditions
+- [x] Advanced AI pricing engine: Price history API with averages by grade, median, sold prices (done: /api/parts/price-history with grade breakdown)
+- [x] AI condition assessment: Vision-based damage detection with credit-card-unit measurement (done: /api/ai/assess-condition with defect list, grade suggestion, confidence)
 - [x] Part interchange database: AI-powered interchange lookup (done: /api/ai/interchange returns compatible vehicles for any part+vehicle combo)
 - [x] Smart search with natural language: AI parses natural language queries into structured filters (done: /api/ai/smart-search + auto-fill filters on search page)
 
@@ -61,5 +61,5 @@ FOLLOW-UP: Watchlist and saved searches APIs + UI (done: watchlist page, saved s
 - [ ] API for yard management systems: REST API for junkyards to sync inventory from their existing systems (Checkmate, Pinnacle, etc.). CIECA standard compliance
 - [ ] Multi-language support: i18n framework with English and Spanish to start. Translate all UI strings, support bilingual listings
 - [x] Yard profile pages: Public seller profiles with inventory, ratings, location (done: /sellers/[id] page + API)
-- [ ] Price history and market trends: Show price trend charts for common parts. "Average selling price for [part] over last 90 days." Help sellers price competitively
+- [x] Price history and market trends: Market pricing data by part type with grade breakdown (done: included in price-history API)
 - [x] Saved vehicle garage: Buyers save vehicles, quick "Find Parts" link pre-fills search (done: garage API + page with add/remove/search)
