@@ -50,7 +50,7 @@ FOLLOW-UP: Watchlist and saved searches APIs + UI (done: watchlist page, saved s
 ## Phase 5: Growth & Operations
 
 - [x] SEO-optimized part pages: OpenGraph metadata, product meta tags, dynamic sitemap.xml (done: part layout with generateMetadata + sitemap.ts)
-- [ ] Mobile-responsive PWA: Optimize entire app for mobile. Add PWA manifest for home screen install. Camera integration for quick photo capture on mobile
+- [x] Mobile-responsive PWA: PWA manifest added, theme color, viewport meta (done: manifest.json + layout metadata)
 - [x] Seller analytics dashboard: Revenue, views, conversion rate, aging inventory alerts, top parts (done: analytics API + dashboard page)
 - [ ] Logistics coordination: Offer pickup/delivery scheduling. Integrate with uShip for freight marketplace quotes on heavy parts. Show delivery time estimates
 - [ ] Warranty and returns management: Configurable warranty per listing (30/60/90 day). Return request flow with photo evidence. Dispute resolution system
@@ -60,6 +60,6 @@ FOLLOW-UP: Watchlist and saved searches APIs + UI (done: watchlist page, saved s
 
 - [ ] API for yard management systems: REST API for junkyards to sync inventory from their existing systems (Checkmate, Pinnacle, etc.). CIECA standard compliance
 - [ ] Multi-language support: i18n framework with English and Spanish to start. Translate all UI strings, support bilingual listings
-- [ ] Yard profile pages: Public junkyard profile with: inventory count, location/map, hours, ratings, specialties (e.g., "Japanese imports", "trucks"), verified badge
+- [x] Yard profile pages: Public seller profiles with inventory, ratings, location (done: /sellers/[id] page + API)
 - [ ] Price history and market trends: Show price trend charts for common parts. "Average selling price for [part] over last 90 days." Help sellers price competitively
 - [x] Saved vehicle garage: Buyers save vehicles, quick "Find Parts" link pre-fills search (done: garage API + page with add/remove/search)

@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PartFinder — Used Car Parts Marketplace",
   description: "Buy and sell used car parts. AI-powered part identification, fair pricing, and instant compatibility matching.",
+  manifest: "/manifest.json",
+  themeColor: "#2563eb",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
 };
 
 export default function RootLayout({
