@@ -14,10 +14,10 @@
 - [x] Database schema: Design and create Prisma schema for users, parts, vehicles, orders, messages, reviews (done: 13 models with full relations, enums, indexes)
 - [x] Authentication: Implement NextAuth.js with email/password + Google OAuth. Separate seller and buyer roles with role-based access (done: NextAuth v5 + credentials + Google OAuth + register API + role-based JWT)
 - [x] Part listing creation: Seller form with part type, title, description, condition grade, pricing, donor vehicle, photos (done: full form + API endpoint + dashboard)
-- [ ] AI part identification from photos: Integrate Claude Vision API or GPT-4o to analyze uploaded part photos and auto-detect: part type (engine, door, headlight, etc.), estimated year/make/model compatibility. Pre-fill the listing form with AI suggestions
+- [x] AI part identification from photos: Integrate Claude Vision API (done: /api/ai/identify-part endpoint using Claude Sonnet, returns part type, condition, compatible vehicles, confidence)
 - [x] VIN decoder integration: Use free NHTSA vPIC API to decode VIN numbers (done: /api/vin/[vin] endpoint with NHTSA integration)
 - [x] Year/Make/Model (YMM) compatibility tagging: Each part listing gets tagged with compatible vehicles (done: PartCompatibility model + form fields)
-- [ ] AI pricing suggestion: When creating a listing, use AI to suggest a price range based on: part type, condition grade (A/B/C), year/make/model, and comparable listings. Start with rule-based pricing, enhance with ML over time
+- [x] AI pricing suggestion: AI-powered price suggestions (done: /api/ai/suggest-price endpoint using Claude, returns low/suggested/high prices with reasoning)
 - [x] Part condition grading UI: Implement ARA/URG standard A/B/C grading with visual guide (done: A/B/C selector with descriptions in listing form)
 
 ## Phase 2: Buyer Experience & Search
