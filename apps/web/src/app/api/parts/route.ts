@@ -130,7 +130,10 @@ export async function GET(req: NextRequest) {
   const conditionGrade = searchParams.get("conditionGrade");
   const q = searchParams.get("q");
 
-  const where: Record<string, unknown> = { status: "ACTIVE" };
+  const where: Record<string, unknown> = {
+    status: "ACTIVE",
+    seller: { holidayMode: false },
+  };
 
   if (partType) where.partType = partType;
   if (conditionGrade) where.conditionGrade = conditionGrade;
