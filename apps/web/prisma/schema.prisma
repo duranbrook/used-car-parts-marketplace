@@ -81,6 +81,10 @@ model User {
   // Offers
   buyerOffers   Offer[] @relation("BuyerOffers")
   sellerOffers  Offer[] @relation("SellerOffers")
+
+  // Disputes
+  buyerDisputes   Dispute[] @relation("BuyerDisputes")
+  sellerDisputes  Dispute[] @relation("SellerDisputes")
 }
 
 model Account {
@@ -187,6 +191,8 @@ model Part {
   storageRow        String?
   storageBin        String?
   storageShelf      String?
+  reservedBy        String?
+  reservedUntil     DateTime?
   weight            Decimal?       @db.Decimal(8, 2) // in pounds
   status            PartStatus     @default(DRAFT)
   views             Int            @default(0)
@@ -266,9 +272,10 @@ model Order {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
-  buyer  User        @relation("BuyerOrders", fields: [buyerId], references: [id])
-  seller User        @relation("SellerOrders", fields: [sellerId], references: [id])
-  items  OrderItem[]
+  buyer   User        @relation("BuyerOrders", fields: [buyerId], references: [id])
+  seller  User        @relation("SellerOrders", fields: [sellerId], references: [id])
+  items   OrderItem[]
+  dispute Dispute?
 
   @@index([buyerId])
   @@index([sellerId])
@@ -388,4 +395,85 @@ model Offer {
   @@index([partId])
   @@index([buyerId])
   @@index([sellerId])
+}
+
+// ──────────────────────────────────────────
+// Ops & Platform Config
+// ──────────────────────────────────────────
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  enabled     Boolean  @default(false)
+  description String?
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED_BUYER
+  RESOLVED_SELLER
+  RESOLVED_SPLIT
+  CLOSED
+}
+
+model Dispute {
+  id          String        @id @default(cuid())
+  orderId     String        @unique
+  buyerId     String
+  sellerId    String
+  reason      String
+  description String?
+  photos      String[]
+  status      DisputeStatus @default(OPEN)
+  resolution  String?
+  resolvedBy  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  order  Order @relation(fields: [orderId], references: [id])
+  buyer  User  @relation("BuyerDisputes", fields: [buyerId], references: [id])
+  seller User  @relation("SellerDisputes", fields: [sellerId], references: [id])
+
+  @@index([status])
+  @@index([buyerId])
+  @@index([sellerId])
+}
+
+enum FraudFlagType {
+  DUPLICATE_LISTING
+  PRICE_ANOMALY
+  VELOCITY
+  CHARGEBACK
+  REPORTED_BY_USER
+}
+
+model FraudFlag {
+  id         String        @id @default(cuid())
+  targetId   String
+  targetType String
+  type       FraudFlagType
+  details    String?
+  resolved   Boolean       @default(false)
+  resolvedBy String?
+  createdAt  DateTime      @default(now())
+
+  @@index([targetId])
+  @@index([resolved])
+}
+
+model DiscountCode {
+  id        String    @id @default(cuid())
+  code      String    @unique
+  type      String
+  value     Decimal?  @db.Decimal(10, 2)
+  maxUses   Int?
+  usedCount Int       @default(0)
+  expiresAt DateTime?
+  createdBy String
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
 }
