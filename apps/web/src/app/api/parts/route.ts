@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { checkListingVelocity, checkPriceAnomaly } from "@/lib/fraud";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -113,6 +114,12 @@ export async function POST(req: NextRequest) {
       donorVehicle: true,
     },
   });
+
+  // Non-blocking fraud checks (fire and forget)
+  void Promise.all([
+    checkListingVelocity(session.user.id),
+    checkPriceAnomaly(partType, parseFloat(price), session.user.id, part.id),
+  ]);
 
   return NextResponse.json(part, { status: 201 });
 }
