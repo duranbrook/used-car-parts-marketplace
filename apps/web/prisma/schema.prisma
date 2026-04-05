@@ -1,0 +1,479 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ──────────────────────────────────────────
+// Auth & Users
+// ──────────────────────────────────────────
+
+enum UserRole {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+enum SellerTier {
+  NEW
+  VERIFIED
+  TOP_RATED
+  POWER_SELLER
+}
+
+enum DismantleStatus {
+  WHOLE
+  PARTIAL
+  STRIPPED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  COUNTERED
+  EXPIRED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  role          UserRole  @default(BUYER)
+  phone         String?
+  location      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+
+  // Seller relations
+  parts          Part[]
+  sellerOrders   Order[]   @relation("SellerOrders")
+  sellerReviews  Review[]  @relation("SellerReviews")
+
+  // Buyer relations
+  buyerOrders    Order[]   @relation("BuyerOrders")
+  buyerReviews   Review[]  @relation("BuyerReviews")
+  cartItems      CartItem[]
+  savedSearches  SavedSearch[]
+  watchlist      Watchlist[]
+
+  // Seller profile
+  sellerTier      SellerTier?
+  businessName    String?
+  businessLicense String?
+  holidayMode     Boolean   @default(false)
+  holidayMessage  String?
+  avgResponseTime Int?      // minutes
+
+  // Messaging
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
+  // Offers
+  buyerOffers   Offer[] @relation("BuyerOffers")
+  sellerOffers  Offer[] @relation("SellerOffers")
+
+  // Disputes
+  buyerDisputes   Dispute[] @relation("BuyerDisputes")
+  sellerDisputes  Dispute[] @relation("SellerDisputes")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ──────────────────────────────────────────
+// Vehicles & Parts
+// ──────────────────────────────────────────
+
+model Vehicle {
+  id           String  @id @default(cuid())
+  vin          String? @unique
+  year         Int
+  make         String
+  model        String
+  trim         String?
+  engineType   String?
+  transmission String?
+  driveType    String?
+  bodyType     String?
+
+  dismantleStatus DismantleStatus @default(WHOLE)
+  mileage         Int?
+  color           String?
+
+  parts             Part[]
+  compatibleParts   PartCompatibility[]
+  photos            VehiclePhoto[]
+
+  @@index([year, make, model])
+}
+
+model VehiclePhoto {
+  id        String   @id @default(cuid())
+  vehicleId String
+  url       String
+  label     String?  // "exterior", "interior", "odometer", "damage"
+  createdAt DateTime @default(now())
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+}
+
+enum ConditionGrade {
+  A  // Highest quality, minimal wear
+  B  // Good quality, moderate wear
+  C  // Acceptable, significant wear
+}
+
+enum PartStatus {
+  DRAFT
+  ACTIVE
+  SOLD
+  RESERVED
+  INACTIVE
+}
+
+model Part {
+  id                String         @id @default(cuid())
+  sellerId          String
+  vehicleId         String?
+  title             String
+  description       String?
+  partType          String         // e.g., "engine", "headlight", "door"
+  partNumber        String?        // OEM part number
+  hollanderNumber   String?        // Hollander interchange number
+  conditionGrade    ConditionGrade
+  conditionNotes    String?
+  price             Decimal        @db.Decimal(10, 2)
+  suggestedPrice    Decimal?       @db.Decimal(10, 2)
+  quantity          Int            @default(1)
+  storageRow        String?
+  storageBin        String?
+  storageShelf      String?
+  reservedBy        String?
+  reservedUntil     DateTime?
+  weight            Decimal?       @db.Decimal(8, 2) // in pounds
+  status            PartStatus     @default(DRAFT)
+  views             Int            @default(0)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  seller            User           @relation(fields: [sellerId], references: [id])
+  donorVehicle      Vehicle?       @relation(fields: [vehicleId], references: [id])
+  images            PartImage[]
+  compatibility     PartCompatibility[]
+  orderItems        OrderItem[]
+  cartItems         CartItem[]
+  reviews           Review[]
+  watchlist         Watchlist[]
+  offers            Offer[]
+
+  @@index([partType])
+  @@index([status])
+  @@index([sellerId])
+  @@index([price])
+}
+
+model PartImage {
+  id        String   @id @default(cuid())
+  partId    String
+  url       String
+  isPrimary Boolean  @default(false)
+  aiTags    String?  // JSON string of AI-detected tags
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  part Part @relation(fields: [partId], references: [id], onDelete: Cascade)
+
+  @@index([partId])
+}
+
+model PartCompatibility {
+  id        String @id @default(cuid())
+  partId    String
+  vehicleId String
+  yearStart Int?
+  yearEnd   Int?
+  notes     String?
+
+  part    Part    @relation(fields: [partId], references: [id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id])
+
+  @@unique([partId, vehicleId])
+}
+
+// ──────────────────────────────────────────
+// Orders & Cart
+// ──────────────────────────────────────────
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  buyerId         String
+  sellerId        String
+  status          OrderStatus @default(PENDING)
+  subtotal        Decimal     @db.Decimal(10, 2)
+  shippingCost    Decimal     @db.Decimal(10, 2) @default(0)
+  platformFee     Decimal     @db.Decimal(10, 2) @default(0)
+  total           Decimal     @db.Decimal(10, 2)
+  trackingNumber  String?
+  shippingCarrier String?
+  notes           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  buyer   User        @relation("BuyerOrders", fields: [buyerId], references: [id])
+  seller  User        @relation("SellerOrders", fields: [sellerId], references: [id])
+  items   OrderItem[]
+  dispute Dispute?
+
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([status])
+}
+
+model OrderItem {
+  id       String  @id @default(cuid())
+  orderId  String
+  partId   String
+  quantity Int
+  price    Decimal @db.Decimal(10, 2)
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  part  Part  @relation(fields: [partId], references: [id])
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  partId    String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  part Part @relation(fields: [partId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, partId])
+}
+
+// ──────────────────────────────────────────
+// Reviews & Communication
+// ──────────────────────────────────────────
+
+model Review {
+  id        String   @id @default(cuid())
+  partId    String?
+  sellerId  String
+  buyerId   String
+  rating    Int      // 1-5
+  comment   String?
+  response  String?  // Seller response
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  part   Part? @relation(fields: [partId], references: [id])
+  seller User  @relation("SellerReviews", fields: [sellerId], references: [id])
+  buyer  User  @relation("BuyerReviews", fields: [buyerId], references: [id])
+
+  @@index([sellerId])
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  partId     String?  // Optional: message about a specific part
+  content    String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id])
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+
+  @@index([senderId, receiverId])
+  @@index([receiverId, read])
+}
+
+// ──────────────────────────────────────────
+// Buyer Features
+// ──────────────────────────────────────────
+
+model SavedSearch {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String?
+  query     String   // JSON string of search params
+  notify    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Watchlist {
+  id        String   @id @default(cuid())
+  userId    String
+  partId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  part Part @relation(fields: [partId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, partId])
+}
+
+// ──────────────────────────────────────────
+// Offers
+// ──────────────────────────────────────────
+
+model Offer {
+  id            String      @id @default(cuid())
+  partId        String
+  buyerId       String
+  sellerId      String
+  amount        Decimal     @db.Decimal(10, 2)
+  status        OfferStatus @default(PENDING)
+  counterAmount Decimal?    @db.Decimal(10, 2)
+  expiresAt     DateTime
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  part   Part @relation(fields: [partId], references: [id])
+  buyer  User @relation("BuyerOffers", fields: [buyerId], references: [id])
+  seller User @relation("SellerOffers", fields: [sellerId], references: [id])
+
+  @@index([partId])
+  @@index([buyerId])
+  @@index([sellerId])
+}
+
+// ──────────────────────────────────────────
+// Ops & Platform Config
+// ──────────────────────────────────────────
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  enabled     Boolean  @default(false)
+  description String?
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED_BUYER
+  RESOLVED_SELLER
+  RESOLVED_SPLIT
+  CLOSED
+}
+
+model Dispute {
+  id          String        @id @default(cuid())
+  orderId     String        @unique
+  buyerId     String
+  sellerId    String
+  reason      String
+  description String?
+  photos      String[]
+  status      DisputeStatus @default(OPEN)
+  resolution  String?
+  resolvedBy  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  order  Order @relation(fields: [orderId], references: [id])
+  buyer  User  @relation("BuyerDisputes", fields: [buyerId], references: [id])
+  seller User  @relation("SellerDisputes", fields: [sellerId], references: [id])
+
+  @@index([status])
+  @@index([buyerId])
+  @@index([sellerId])
+}
+
+enum FraudFlagType {
+  DUPLICATE_LISTING
+  PRICE_ANOMALY
+  VELOCITY
+  CHARGEBACK
+  REPORTED_BY_USER
+}
+
+model FraudFlag {
+  id         String        @id @default(cuid())
+  targetId   String
+  targetType String
+  type       FraudFlagType
+  details    String?
+  resolved   Boolean       @default(false)
+  resolvedBy String?
+  createdAt  DateTime      @default(now())
+
+  @@index([targetId])
+  @@index([resolved])
+}
+
+model DiscountCode {
+  id        String    @id @default(cuid())
+  code      String    @unique
+  type      String
+  value     Decimal?  @db.Decimal(10, 2)
+  maxUses   Int?
+  usedCount Int       @default(0)
+  expiresAt DateTime?
+  createdBy String
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+}
