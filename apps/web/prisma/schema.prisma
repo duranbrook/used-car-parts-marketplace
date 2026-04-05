@@ -17,6 +17,27 @@ enum UserRole {
   ADMIN
 }
 
+enum SellerTier {
+  NEW
+  VERIFIED
+  TOP_RATED
+  POWER_SELLER
+}
+
+enum DismantleStatus {
+  WHOLE
+  PARTIAL
+  STRIPPED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  COUNTERED
+  EXPIRED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -45,9 +66,21 @@ model User {
   savedSearches  SavedSearch[]
   watchlist      Watchlist[]
 
+  // Seller profile
+  sellerTier      SellerTier?
+  businessName    String?
+  businessLicense String?
+  holidayMode     Boolean   @default(false)
+  holidayMessage  String?
+  avgResponseTime Int?      // minutes
+
   // Messaging
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
+
+  // Offers
+  buyerOffers   Offer[] @relation("BuyerOffers")
+  sellerOffers  Offer[] @relation("SellerOffers")
 }
 
 model Account {
@@ -102,10 +135,25 @@ model Vehicle {
   driveType    String?
   bodyType     String?
 
+  dismantleStatus DismantleStatus @default(WHOLE)
+  mileage         Int?
+  color           String?
+
   parts             Part[]
   compatibleParts   PartCompatibility[]
+  photos            VehiclePhoto[]
 
   @@index([year, make, model])
+}
+
+model VehiclePhoto {
+  id        String   @id @default(cuid())
+  vehicleId String
+  url       String
+  label     String?  // "exterior", "interior", "odometer", "damage"
+  createdAt DateTime @default(now())
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
 }
 
 enum ConditionGrade {
@@ -136,6 +184,9 @@ model Part {
   price             Decimal        @db.Decimal(10, 2)
   suggestedPrice    Decimal?       @db.Decimal(10, 2)
   quantity          Int            @default(1)
+  storageRow        String?
+  storageBin        String?
+  storageShelf      String?
   weight            Decimal?       @db.Decimal(8, 2) // in pounds
   status            PartStatus     @default(DRAFT)
   views             Int            @default(0)
@@ -150,6 +201,7 @@ model Part {
   cartItems         CartItem[]
   reviews           Review[]
   watchlist         Watchlist[]
+  offers            Offer[]
 
   @@index([partType])
   @@index([status])
@@ -311,4 +363,29 @@ model Watchlist {
   part Part @relation(fields: [partId], references: [id], onDelete: Cascade)
 
   @@unique([userId, partId])
+}
+
+// ──────────────────────────────────────────
+// Offers
+// ──────────────────────────────────────────
+
+model Offer {
+  id            String      @id @default(cuid())
+  partId        String
+  buyerId       String
+  sellerId      String
+  amount        Decimal     @db.Decimal(10, 2)
+  status        OfferStatus @default(PENDING)
+  counterAmount Decimal?    @db.Decimal(10, 2)
+  expiresAt     DateTime
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  part   Part @relation(fields: [partId], references: [id])
+  buyer  User @relation("BuyerOffers", fields: [buyerId], references: [id])
+  seller User @relation("SellerOffers", fields: [sellerId], references: [id])
+
+  @@index([partId])
+  @@index([buyerId])
+  @@index([sellerId])
 }
