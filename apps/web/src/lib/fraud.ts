@@ -30,7 +30,7 @@ export async function checkListingVelocity(
 }
 
 export async function checkPriceAnomaly(
-  partType: string,
+  partType: import("@/generated/prisma/client").PartType,
   price: number,
   sellerId: string,
   partId: string

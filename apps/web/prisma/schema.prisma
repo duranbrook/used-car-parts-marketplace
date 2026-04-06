@@ -38,44 +38,59 @@ enum OfferStatus {
   EXPIRED
 }
 
-// 34-category taxonomy derived from Pull-A-Part, LKQ Pick Your Part, RockAuto,
-// eBay Motors, Car-Part.com, and MarkLines OEM industry standard.
-// Reference: docs/parts-taxonomy.md
+// 38-category taxonomy derived from Pull-A-Part, LKQ Pick Your Part, RockAuto,
+// eBay Motors, Car-Part.com, MarkLines OEM standard, Auto Care Association PCdb,
+// Dorman Products, Standard Motor Products, and Hollander interchange system.
+// 600+ individual part types documented in docs/parts-taxonomy.md
+// Live parts API options documented in docs/parts-apis.md
 enum PartType {
+  // Powertrain
   ENGINE
+  ENGINE_LUBRICATION      // Oil pump, oil pan, PCV — separate from ENGINE per RockAuto/PCdb
+  ENGINE_COOLING
+  FUEL_AND_AIR
+  IGNITION
+  EXHAUST
+  TURBOCHARGER            // Turbo/supercharger assemblies and components
+  BELT_DRIVE
   TRANSMISSION
-  TRANSFER_CASE
   DRIVETRAIN
+  TRANSFER_CASE
+  // Chassis
   BRAKES
   SUSPENSION
   STEERING
-  ENGINE_COOLING
-  FUEL_AND_AIR
-  EXHAUST
-  IGNITION
-  ELECTRICAL_CHARGING
-  ELECTRICAL_WIRING
-  ECU_AND_MODULES
-  SENSORS
+  WHEELS_AND_TIRES
+  // Electrical
+  ELECTRICAL_CHARGING     // Battery, starter, alternator
+  ELECTRICAL_WIRING       // Harnesses, fuse boxes, connectors
+  ECU_AND_MODULES         // PCM/ECM/TCM/BCM/SRS — Pull-A-Part's own top-level category
+  SENSORS                 // Standalone sensors (O2, MAF, CKP, ABS wheel speed, etc.)
+  SWITCHES_AND_RELAYS     // All switches and relays not part of a module
+  // Climate
   HVAC
+  // Body
   BODY_PANELS
   DOORS
   GLASS
-  LIGHTING
+  WINDOWS                 // Window regulators & motors (separate from glass per RockAuto)
+  LIGHTING                // eBay Motors makes this its own top-level, separate from Electrical
   MIRRORS
+  // Interior
   INTERIOR
   SEATS
   AIRBAGS
   INSTRUMENT_CLUSTER
   AUDIO_AND_INFOTAINMENT
-  WHEELS_AND_TIRES
-  BELT_DRIVE
+  // Other systems
   WIPERS
   SUNROOF
   TOWING
-  EV_AND_HYBRID
-  ADAS
-  HARDWARE
+  // Emerging
+  EV_AND_HYBRID           // eBay Motors standalone top-level; fastest-growing salvage category
+  ADAS                    // Radar, cameras, LiDAR — high-value late-model parts
+  // General
+  HARDWARE                // Fasteners, clips, gaskets, seals, O-rings
 }
 
 model User {

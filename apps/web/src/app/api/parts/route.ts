@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
   // Non-blocking fraud checks (fire and forget)
   void Promise.all([
     checkListingVelocity(session.user.id),
-    checkPriceAnomaly(partType, parseFloat(price), session.user.id, part.id),
+    checkPriceAnomaly(partType as PartType, parseFloat(price), session.user.id, part.id),
   ]);
 
   return NextResponse.json(part, { status: 201 });
