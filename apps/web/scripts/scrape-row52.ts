@@ -107,105 +107,72 @@ function parseVehicles(html: string): Row52Vehicle[] {
   const doc = dom.window.document;
   const vehicles: Row52Vehicle[] = [];
 
-  // Row52 renders vehicles in <div class="row-standard"> or <tr> elements
-  // Try table rows first (most likely structure based on URL params)
-  const rows = doc.querySelectorAll("table tbody tr, .vehicle-row, .row-standard, [class*='vehicle']");
+  // Row52 uses schema.org microdata on each vehicle block.
+  // Each vehicle is a div[itemtype="http://schema.org/Thing/Automobile"]
+  // with <meta itemprop="vin|make|model|year"> tags inside.
+  const rows = doc.querySelectorAll('[itemtype="http://schema.org/Thing/Automobile"]');
 
   if (rows.length === 0) {
-    // Fallback: look for any div with year/make/model pattern
     const allText = doc.body?.textContent ?? "";
     if (allText.includes("No vehicles found") || allText.includes("no results")) {
       return [];
     }
-    // Log a snippet to help debug the actual HTML structure
     console.log("   ⚠️  Could not parse rows. Page structure may have changed.");
-    console.log("      HTML snippet:", html.slice(0, 500));
     return [];
   }
 
+  const text = (el: Element | null) => el?.textContent?.trim() ?? "";
+  const meta = (row: Element, prop: string) =>
+    row.querySelector(`meta[itemprop="${prop}"]`)?.getAttribute("content") ?? "";
+
   for (const row of rows) {
     try {
-      // Extract text content from cells
-      const cells = row.querySelectorAll("td, .cell, [class*='col']");
-      if (cells.length < 3) continue;
+      const vin = meta(row, "vin") || null;
+      const make = meta(row, "make");
+      const model = meta(row, "model");
+      const year = parseInt(meta(row, "year")) || 0;
 
-      const text = (el: Element | null) => el?.textContent?.trim() ?? "";
-
-      // Row52 typical columns: Image | Year Make Model | VIN | Yard | Row | Date
-      // The exact structure depends on their current HTML — we try multiple patterns
-
-      let year = 0;
-      let make = "";
-      let model = "";
-      let vin: string | null = null;
-      let yardName = "";
-      let yardCity = "";
-      let yardState = "";
-      let rowNum: string | null = null;
-      let dateAdded: Date | null = null;
-      let imageUrl: string | null = null;
+      if (year < 1960 || (!make && !vin)) continue;
 
       // Image
-      const img = row.querySelector("img");
-      if (img) imageUrl = img.getAttribute("src") ?? null;
+      const img = row.querySelector('img[itemprop="image"]');
+      const imageUrl = img?.getAttribute("src") ?? null;
 
-      // Look for VIN pattern (17 chars alphanumeric)
-      const fullText = text(row);
-      const vinMatch = fullText.match(/\b([A-HJ-NPR-Z0-9]{17})\b/);
-      if (vinMatch) vin = vinMatch[1];
+      // Yard name and address from nested AutomotiveBusiness block
+      const yardBlock = row.querySelector('[itemtype="http://schema.org/AutomotiveBusiness"]');
+      const yardName = text(yardBlock?.querySelector('[itemprop="name"]') ?? null);
+      const addressRaw = text(yardBlock?.querySelector('[itemprop="address"]') ?? null);
+      // addressRaw: "Salt Lake City, Utah 84115" → city + state abbrev
+      const addrMatch = addressRaw.match(/^(.+?),\s+(\w+)\s+\d/);
+      const yardCity = addrMatch?.[1] ?? "";
+      // State is full name in address (e.g. "Utah") — extract 2-letter from known abbrevs or just store full name
+      const yardState = addrMatch?.[2] ?? "";
 
-      // Year (4 digits starting with 19xx or 20xx)
-      const yearMatch = fullText.match(/\b(19[6-9]\d|20[0-3]\d)\b/);
-      if (yearMatch) year = parseInt(yearMatch[1]);
-
-      // Date pattern MM/DD/YYYY
-      const dateMatch = fullText.match(/\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/);
-      if (dateMatch) {
-        dateAdded = new Date(`${dateMatch[3]}-${dateMatch[1].padStart(2, "0")}-${dateMatch[2].padStart(2, "0")}`);
+      // Row number: in the .col-md-1 div after the yard block
+      // Structure: <h4>Row</h4><div class="list-row-right"><strong>38</strong></div>
+      let rowNum: string | null = null;
+      const allCols = row.querySelectorAll(".col-md-1, .col-md-2");
+      for (const col of allCols) {
+        const heading = col.querySelector("h4");
+        if (heading?.textContent?.trim() === "Row") {
+          rowNum = text(col.querySelector("strong")) || null;
+        }
       }
 
-      // Row number pattern "Row XX" or "Row: XX"
-      const rowMatch = fullText.match(/[Rr]ow[:\s]+([A-Z0-9]+)/);
-      if (rowMatch) rowNum = rowMatch[1];
-
-      // Parse cells positionally — Row52 has consistent column order
-      for (let i = 0; i < cells.length; i++) {
-        const cellText = text(cells[i]);
-
-        // YMM cell usually has "YEAR MAKE MODEL" or links
-        const links = cells[i].querySelectorAll("a");
-        for (const link of links) {
-          const linkText = link.textContent?.trim() ?? "";
-          // Yard name links contain location info
-          if (/pick.n.pull|u-pull|lkq|pull-a-part|yard|auto/i.test(linkText)) {
-            yardName = linkText;
+      // Date added: in the .col-md-2 div
+      let dateAdded: Date | null = null;
+      for (const col of allCols) {
+        const heading = col.querySelector("h4");
+        if (heading?.textContent?.trim() === "Added to yard") {
+          const dateText = text(col.querySelector("strong"));
+          if (dateText) {
+            const d = new Date(dateText);
+            if (!isNaN(d.getTime())) dateAdded = d;
           }
         }
-
-        // State abbreviation pattern
-        const stateMatch = cellText.match(/,\s*([A-Z]{2})(?:\s|$)/);
-        if (stateMatch && !yardState) {
-          yardState = stateMatch[1];
-          yardCity = cellText.replace(/,.*$/, "").trim();
-        }
       }
 
-      // Extract make/model from the ymm link text or cell text
-      // Typical: "2015 Honda Civic" in a link or strong tag
-      const ymmEl = row.querySelector("a[href*='/Search'], strong, b, .ymm, [class*='make'], [class*='model']");
-      if (ymmEl) {
-        const ymmText = text(ymmEl);
-        const ymmMatch = ymmText.match(/^(\d{4})\s+(.+?)\s+(.+)$/);
-        if (ymmMatch) {
-          year = parseInt(ymmMatch[1]);
-          make = ymmMatch[2];
-          model = ymmMatch[3];
-        }
-      }
-
-      if (year > 1960 && (make || vin)) {
-        vehicles.push({ year, make, model, vin, yardName, yardCity, yardState, row: rowNum, dateAdded, imageUrl });
-      }
+      vehicles.push({ year, make, model, vin, yardName, yardCity, yardState, row: rowNum, dateAdded, imageUrl });
     } catch {
       // Skip malformed rows
     }
