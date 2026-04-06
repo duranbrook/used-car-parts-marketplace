@@ -24,6 +24,13 @@ export default defineConfig({
       name: "setup",
       testMatch: /auth\.setup\.ts/,
     },
+    // No storageState — for auth flow and access-control tests
+    {
+      name: "no-auth",
+      use: { ...devices["Desktop Chrome"] },
+      dependencies: ["setup"],
+      testMatch: /auth\.spec\.ts|access-control\.spec\.ts/,
+    },
     {
       name: "buyer",
       use: {
@@ -31,7 +38,7 @@ export default defineConfig({
         storageState: "e2e/.auth/buyer.json",
       },
       dependencies: ["setup"],
-      testMatch: /buyer\.spec\.ts/,
+      testMatch: /buyer\.spec\.ts|cart\.spec\.ts/,
     },
     {
       name: "seller",
@@ -40,7 +47,7 @@ export default defineConfig({
         storageState: "e2e/.auth/seller.json",
       },
       dependencies: ["setup"],
-      testMatch: /seller\.spec\.ts/,
+      testMatch: /seller\.spec\.ts|part-creation\.spec\.ts/,
     },
     {
       name: "ops",
