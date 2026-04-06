@@ -29,7 +29,7 @@ export default defineConfig({
       name: "no-auth",
       use: { ...devices["Desktop Chrome"] },
       dependencies: ["setup"],
-      testMatch: /auth\.spec\.ts|access-control\.spec\.ts/,
+      testMatch: /auth\.spec\.ts|access-control\.spec\.ts|vin\.spec\.ts|search-filters\.spec\.ts/,
     },
     {
       name: "buyer",
@@ -38,7 +38,7 @@ export default defineConfig({
         storageState: "e2e/.auth/buyer.json",
       },
       dependencies: ["setup"],
-      testMatch: /buyer\.spec\.ts|cart\.spec\.ts/,
+      testMatch: /buyer\.spec\.ts|cart\.spec\.ts|checkout\.spec\.ts|garage\.spec\.ts|watchlist\.spec\.ts|buyer-offers\.spec\.ts|reserve\.spec\.ts|reviews\.spec\.ts|messages\.spec\.ts/,
     },
     {
       name: "seller",
@@ -47,7 +47,7 @@ export default defineConfig({
         storageState: "e2e/.auth/seller.json",
       },
       dependencies: ["setup"],
-      testMatch: /seller\.spec\.ts|part-creation\.spec\.ts/,
+      testMatch: /seller\.spec\.ts|part-creation\.spec\.ts|seller-offers\.spec\.ts/,
     },
     {
       name: "ops",

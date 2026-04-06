@@ -13,7 +13,35 @@ export async function seedE2E(databaseUrl: string) {
   try {
     const passwordHash = await bcrypt.hash("Test1234!", 10);
 
-    // Clean previous test run data
+    // Clean previous test run data in FK-safe order
+    const prevSeller = await prisma.user.findUnique({ where: { email: "seller@test.com" } });
+    if (prevSeller) {
+      const prevParts = await prisma.part.findMany({ where: { sellerId: prevSeller.id }, select: { id: true } });
+      const prevPartIds = prevParts.map((p) => p.id);
+      if (prevPartIds.length > 0) {
+        await prisma.offer.deleteMany({ where: { partId: { in: prevPartIds } } });
+        await prisma.orderItem.deleteMany({ where: { partId: { in: prevPartIds } } });
+        await prisma.cartItem.deleteMany({ where: { userId: prevSeller.id } });
+        await prisma.review.deleteMany({ where: { partId: { in: prevPartIds } } });
+        await prisma.watchlist.deleteMany({ where: { partId: { in: prevPartIds } } });
+        await prisma.message.deleteMany({ where: { partId: { in: prevPartIds } } });
+      }
+      // Clean up orders for test users before deleting parts
+      const prevBuyer = await prisma.user.findUnique({ where: { email: "buyer@test.com" } });
+      if (prevBuyer) {
+        const prevOrders = await prisma.order.findMany({ where: { OR: [{ buyerId: prevBuyer.id }, { sellerId: prevSeller.id }] }, select: { id: true } });
+        if (prevOrders.length > 0) {
+          await prisma.orderItem.deleteMany({ where: { orderId: { in: prevOrders.map((o) => o.id) } } });
+          await prisma.order.deleteMany({ where: { id: { in: prevOrders.map((o) => o.id) } } });
+        }
+      }
+    }
+    await prisma.offer.deleteMany({ where: { buyer: { email: { endsWith: "@test.com" } } } });
+    await prisma.review.deleteMany({ where: { buyer: { email: { endsWith: "@test.com" } } } });
+    await prisma.message.deleteMany({ where: { OR: [{ sender: { email: { endsWith: "@test.com" } } }, { receiver: { email: { endsWith: "@test.com" } } }] } });
+    await prisma.cartItem.deleteMany({ where: { user: { email: { endsWith: "@test.com" } } } });
+    await prisma.savedSearch.deleteMany({ where: { user: { email: { endsWith: "@test.com" } } } });
+    await prisma.watchlist.deleteMany({ where: { user: { email: { endsWith: "@test.com" } } } });
     await prisma.part.deleteMany({ where: { seller: { email: { endsWith: "@test.com" } } } });
     await prisma.user.deleteMany({ where: { email: { endsWith: "@test.com" } } });
     await prisma.vehicle.deleteMany({ where: { vin: "1HGBH41JXMN109186" } });
