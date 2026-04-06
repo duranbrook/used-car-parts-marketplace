@@ -70,7 +70,7 @@ test.describe("Part creation: API", () => {
       const create = await request.post("/api/parts", {
         data: {
           title: "Cart Self-Test Part",
-          partType: "MISC",
+          partType: "HARDWARE",
           conditionGrade: "C",
           price: 10.0,
         },

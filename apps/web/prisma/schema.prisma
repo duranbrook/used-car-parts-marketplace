@@ -38,6 +38,46 @@ enum OfferStatus {
   EXPIRED
 }
 
+// 34-category taxonomy derived from Pull-A-Part, LKQ Pick Your Part, RockAuto,
+// eBay Motors, Car-Part.com, and MarkLines OEM industry standard.
+// Reference: docs/parts-taxonomy.md
+enum PartType {
+  ENGINE
+  TRANSMISSION
+  TRANSFER_CASE
+  DRIVETRAIN
+  BRAKES
+  SUSPENSION
+  STEERING
+  ENGINE_COOLING
+  FUEL_AND_AIR
+  EXHAUST
+  IGNITION
+  ELECTRICAL_CHARGING
+  ELECTRICAL_WIRING
+  ECU_AND_MODULES
+  SENSORS
+  HVAC
+  BODY_PANELS
+  DOORS
+  GLASS
+  LIGHTING
+  MIRRORS
+  INTERIOR
+  SEATS
+  AIRBAGS
+  INSTRUMENT_CLUSTER
+  AUDIO_AND_INFOTAINMENT
+  WHEELS_AND_TIRES
+  BELT_DRIVE
+  WIPERS
+  SUNROOF
+  TOWING
+  EV_AND_HYBRID
+  ADAS
+  HARDWARE
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -180,7 +220,7 @@ model Part {
   vehicleId         String?
   title             String
   description       String?
-  partType          String         // e.g., "engine", "headlight", "door"
+  partType          PartType
   partNumber        String?        // OEM part number
   hollanderNumber   String?        // Hollander interchange number
   conditionGrade    ConditionGrade

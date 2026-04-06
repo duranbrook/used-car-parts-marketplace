@@ -15,16 +15,28 @@ export async function GET(
     return NextResponse.json({ error: "VIN must be 17 characters" }, { status: 400 });
   }
 
-  const res = await fetch(
-    `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${vin}?format=json`
-  );
+  let res: Response;
+  try {
+    res = await fetch(
+      `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${vin}?format=json`,
+      { signal: AbortSignal.timeout(8000) }
+    );
+  } catch {
+    return NextResponse.json({ error: "VIN lookup service unavailable" }, { status: 503 });
+  }
 
   if (!res.ok) {
     return NextResponse.json({ error: "Failed to decode VIN" }, { status: 502 });
   }
 
-  const data = await res.json();
-  const results = data.Results?.[0];
+  let data: { Results?: Record<string, string>[] };
+  try {
+    data = await res.json();
+  } catch {
+    // NHTSA returned non-JSON (e.g., maintenance page)
+    return NextResponse.json({ error: "VIN lookup service unavailable" }, { status: 503 });
+  }
+  const results = data.Results?.[0] as Record<string, string> | undefined;
 
   if (!results) {
     return NextResponse.json({ error: "No results found" }, { status: 404 });

@@ -76,7 +76,7 @@ export async function seedE2E(databaseUrl: string) {
         {
           title: "Brake Pad Set - Toyota Camry 2015",
           description: "OEM brake pads, minimal wear",
-          partType: "BRAKES",
+          partType: "BRAKES" as const,
           conditionGrade: "A",
           price: 45.0,
           status: "ACTIVE",
@@ -86,7 +86,7 @@ export async function seedE2E(databaseUrl: string) {
         {
           title: "Alternator - Toyota Camry 2015",
           description: "Tested and working",
-          partType: "ELECTRICAL",
+          partType: "ELECTRICAL_CHARGING" as const,
           conditionGrade: "B",
           price: 120.0,
           status: "ACTIVE",
@@ -96,7 +96,7 @@ export async function seedE2E(databaseUrl: string) {
         {
           title: "Front Bumper Cover",
           description: "Minor scuff on lower edge",
-          partType: "BODY",
+          partType: "BODY_PANELS" as const,
           conditionGrade: "C",
           price: 200.0,
           status: "ACTIVE",

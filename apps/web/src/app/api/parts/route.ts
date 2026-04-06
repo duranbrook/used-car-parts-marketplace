@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { PartType } from "@/generated/prisma/client";
 import { checkListingVelocity, checkPriceAnomaly } from "@/lib/fraud";
 
 export async function POST(req: NextRequest) {
@@ -32,6 +33,13 @@ export async function POST(req: NextRequest) {
   if (!title || !partType || !conditionGrade || !price) {
     return NextResponse.json(
       { error: "Title, part type, condition grade, and price are required" },
+      { status: 400 }
+    );
+  }
+
+  if (!Object.values(PartType).includes(partType as PartType)) {
+    return NextResponse.json(
+      { error: `Invalid partType. Valid values: ${Object.values(PartType).join(", ")}` },
       { status: 400 }
     );
   }
@@ -142,7 +150,12 @@ export async function GET(req: NextRequest) {
     seller: { holidayMode: false },
   };
 
-  if (partType) where.partType = partType;
+  if (partType) {
+    if (!Object.values(PartType).includes(partType as PartType)) {
+      return NextResponse.json({ error: `Invalid partType. Valid values: ${Object.values(PartType).join(", ")}` }, { status: 400 });
+    }
+    where.partType = partType as PartType;
+  }
   if (conditionGrade) where.conditionGrade = conditionGrade;
   if (minPrice || maxPrice) {
     where.price = {};
@@ -153,7 +166,6 @@ export async function GET(req: NextRequest) {
     where.OR = [
       { title: { contains: q, mode: "insensitive" } },
       { description: { contains: q, mode: "insensitive" } },
-      { partType: { contains: q, mode: "insensitive" } },
     ];
   }
   if (make || model || year) {
