@@ -1,14 +1,13 @@
-import { PrismaClient } from "../src/generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 
 export default async function globalTeardown() {
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
-  const prisma = new PrismaClient({ adapter });
+  const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
   try {
-    await prisma.user.deleteMany({
-      where: { email: { in: ["buyer@test.com", "seller@test.com", "admin@test.com"] } },
-    });
+    // Delete in FK-safe order
+    await pool.query(`DELETE FROM "Part" WHERE "sellerId" IN (SELECT id FROM "User" WHERE email LIKE '%@test.com')`);
+    await pool.query(`DELETE FROM "User" WHERE email LIKE '%@test.com'`);
+    await pool.query(`DELETE FROM "DiscountCode" WHERE code LIKE 'E2ETEST%'`);
   } finally {
-    await prisma.$disconnect();
+    await pool.end();
   }
 }

@@ -1,6 +1,6 @@
 /**
  * Seeds the test database with known users and parts for E2E tests.
- * Run via global-setup — not directly.
+ * Run via: npx tsx prisma/seed-e2e.ts
  */
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -16,6 +16,7 @@ export async function seedE2E(databaseUrl: string) {
     // Clean previous test run data
     await prisma.part.deleteMany({ where: { seller: { email: { endsWith: "@test.com" } } } });
     await prisma.user.deleteMany({ where: { email: { endsWith: "@test.com" } } });
+    await prisma.vehicle.deleteMany({ where: { vin: "1HGBH41JXMN109186" } });
 
     // Create test users
     const buyer = await prisma.user.create({
@@ -38,13 +39,7 @@ export async function seedE2E(databaseUrl: string) {
 
     // Create a donor vehicle owned by seller
     const vehicle = await prisma.vehicle.create({
-      data: {
-        year: 2015,
-        make: "Toyota",
-        model: "Camry",
-        vin: "1HGBH41JXMN109186",
-        sellerId: seller.id,
-      },
+      data: { year: 2015, make: "Toyota", model: "Camry", vin: "1HGBH41JXMN109186" },
     });
 
     // Create test parts
@@ -58,7 +53,7 @@ export async function seedE2E(databaseUrl: string) {
           price: 45.0,
           status: "ACTIVE",
           sellerId: seller.id,
-          donorVehicleId: vehicle.id,
+          vehicleId: vehicle.id,
         },
         {
           title: "Alternator - Toyota Camry 2015",
@@ -68,7 +63,7 @@ export async function seedE2E(databaseUrl: string) {
           price: 120.0,
           status: "ACTIVE",
           sellerId: seller.id,
-          donorVehicleId: vehicle.id,
+          vehicleId: vehicle.id,
         },
         {
           title: "Front Bumper Cover",
@@ -78,7 +73,7 @@ export async function seedE2E(databaseUrl: string) {
           price: 200.0,
           status: "ACTIVE",
           sellerId: seller.id,
-          donorVehicleId: vehicle.id,
+          vehicleId: vehicle.id,
         },
       ],
     });
@@ -90,3 +85,9 @@ export async function seedE2E(databaseUrl: string) {
     await prisma.$disconnect();
   }
 }
+
+// Run when executed directly
+seedE2E(process.env.DATABASE_URL!).catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

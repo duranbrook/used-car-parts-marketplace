@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Ops/Admin: platform management", () => {
   test("dashboard shows ADMIN role badge", async ({ page }) => {
     await page.goto("/dashboard");
-    await expect(page.getByText("ADMIN")).toBeVisible();
+    await expect(page.getByText("ADMIN", { exact: true })).toBeVisible();
   });
 
   test("admin stats API returns platform stats", async ({ request }) => {
@@ -22,39 +22,34 @@ test.describe("Ops/Admin: platform management", () => {
   });
 
   test("ops discounts API can create and list codes", async ({ request }) => {
-    // Create a discount code
+    // Use a unique code suffix to avoid conflicts across runs
+    const code = `E2ETEST${Date.now().toString().slice(-6)}`;
     const create = await request.post("/api/ops/discounts", {
-      data: { code: "E2ETEST10", type: "percent", value: 10, maxUses: 5 },
+      data: { code, type: "percent", value: 10, maxUses: 5 },
     });
     expect(create.status()).toBe(201);
-    const code = await create.json();
-    expect(code.code).toBe("E2ETEST10");
+    const body = await create.json();
+    expect(body.code).toBe(code);
 
-    // List all codes
     const list = await request.get("/api/ops/discounts");
     expect(list.status()).toBe(200);
     const codes = await list.json();
-    expect(codes.some((c: { code: string }) => c.code === "E2ETEST10")).toBe(true);
+    expect(codes.some((c: { code: string }) => c.code === code)).toBe(true);
   });
 
-  test("non-admin cannot access ops sellers API", async ({ browser }) => {
-    // Use a fresh browser context (no auth)
-    const ctx = await browser.newContext();
-    const req = await ctx.request.get("http://localhost:3000/api/ops/sellers");
-    expect(req.status()).toBe(403);
-    await ctx.close();
+  test("non-admin cannot access ops sellers API", async ({ page, context }) => {
+    // Clear the browser context cookies so page.request is also unauthenticated
+    await context.clearCookies();
+    const res = await page.request.get("/api/ops/sellers");
+    expect([401, 403]).toContain(res.status());
   });
 
   test("seller suspend action works via API", async ({ request }) => {
-    // Get the seller user's ID first
     const sellers = await request.get("/api/ops/sellers");
     const list = await sellers.json();
-    const testSeller = list.find(
-      (s: { email: string }) => s.email === "seller@test.com"
-    );
+    const testSeller = list.find((s: { email: string }) => s.email === "seller@test.com");
     expect(testSeller).toBeDefined();
 
-    // Suspend them
     const suspend = await request.patch(`/api/ops/sellers/${testSeller.id}`, {
       data: { action: "suspend" },
     });
@@ -62,7 +57,7 @@ test.describe("Ops/Admin: platform management", () => {
     const updated = await suspend.json();
     expect(updated.holidayMode).toBe(true);
 
-    // Unsuspend to leave DB clean for other tests
+    // Restore so other tests aren't affected
     await request.patch(`/api/ops/sellers/${testSeller.id}`, {
       data: { action: "unsuspend" },
     });

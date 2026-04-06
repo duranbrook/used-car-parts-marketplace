@@ -55,6 +55,7 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.2",
-    "@playwright/test": "^1.50.0"
+    "@playwright/test": "^1.50.0",
+    "tsx": "^4.19.0"
   }
 }
