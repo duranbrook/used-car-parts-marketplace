@@ -4,16 +4,18 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { auth } from "@/lib/auth";
 import { randomBytes } from "crypto";
 
+// Google Cloud Storage via its S3-compatible XML API.
+// Uses HMAC keys from GCS → Settings → Interoperability.
 const s3 = new S3Client({
-  region: process.env.AWS_REGION ?? "us-east-1",
+  region: "auto",
+  endpoint: "https://storage.googleapis.com",
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    accessKeyId: process.env.GCS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.GCS_SECRET_ACCESS_KEY!,
   },
-  ...(process.env.S3_ENDPOINT ? { endpoint: process.env.S3_ENDPOINT } : {}),
 });
 
-const BUCKET = process.env.S3_BUCKET ?? "car-parts-media";
+const BUCKET = process.env.GCS_BUCKET ?? "car-parts-media";
 const ALLOWED_CONTENT_TYPES = [
   "image/jpeg",
   "image/png",
@@ -50,7 +52,7 @@ export async function POST(req: NextRequest) {
   });
 
   const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
-  const publicUrl = `https://${BUCKET}.s3.amazonaws.com/${key}`;
+  const publicUrl = `https://storage.googleapis.com/${BUCKET}/${key}`;
 
   return NextResponse.json({ uploadUrl, key, publicUrl });
 }
