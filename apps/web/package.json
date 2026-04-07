@@ -22,7 +22,8 @@
     "import:ebay": "tsx scripts/import-ebay-parts.ts",
     "import:ebay:dry": "tsx scripts/import-ebay-parts.ts --dry-run",
     "scrape:row52": "tsx scripts/scrape-row52.ts",
-    "scrape:row52:dry": "tsx scripts/scrape-row52.ts --dry-run"
+    "scrape:row52:dry": "tsx scripts/scrape-row52.ts --dry-run",
+    "secrets:pull": "op inject -i .env.template -o .env.local && echo '✓ .env.local written'"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
