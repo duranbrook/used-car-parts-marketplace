@@ -4,15 +4,46 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const PART_TYPES = [
-  "Engine", "Transmission", "Door", "Hood", "Fender", "Bumper",
-  "Headlight", "Taillight", "Mirror", "Wheel/Rim", "Tire",
-  "Radiator", "Alternator", "Starter", "AC Compressor",
-  "Window", "Seat", "Dashboard", "Steering Column",
-  "Axle", "Differential", "Transfer Case", "ECU/Computer",
-  "Fuel Pump", "Intake Manifold", "Exhaust", "Catalytic Converter",
-  "Brake Caliper", "Brake Rotor", "Suspension", "Strut/Shock",
-  "Other",
+// Maps Prisma PartType enum values to display labels
+const PART_TYPES: { value: string; label: string }[] = [
+  { value: "ENGINE", label: "Engine" },
+  { value: "ENGINE_LUBRICATION", label: "Engine Lubrication" },
+  { value: "ENGINE_COOLING", label: "Engine Cooling" },
+  { value: "FUEL_AND_AIR", label: "Fuel & Air" },
+  { value: "IGNITION", label: "Ignition" },
+  { value: "EXHAUST", label: "Exhaust" },
+  { value: "TURBOCHARGER", label: "Turbocharger" },
+  { value: "BELT_DRIVE", label: "Belt Drive" },
+  { value: "TRANSMISSION", label: "Transmission" },
+  { value: "DRIVETRAIN", label: "Drivetrain / Axle" },
+  { value: "TRANSFER_CASE", label: "Transfer Case" },
+  { value: "BRAKES", label: "Brakes" },
+  { value: "SUSPENSION", label: "Suspension" },
+  { value: "STEERING", label: "Steering" },
+  { value: "WHEELS_AND_TIRES", label: "Wheels & Tires" },
+  { value: "ELECTRICAL_CHARGING", label: "Electrical / Charging (Alternator, Battery)" },
+  { value: "ELECTRICAL_WIRING", label: "Electrical / Wiring" },
+  { value: "ECU_AND_MODULES", label: "ECU & Modules" },
+  { value: "SENSORS", label: "Sensors" },
+  { value: "SWITCHES_AND_RELAYS", label: "Switches & Relays" },
+  { value: "HVAC", label: "HVAC / AC" },
+  { value: "BODY_PANELS", label: "Body Panels (Hood, Fender, Bumper)" },
+  { value: "DOORS", label: "Doors" },
+  { value: "GLASS", label: "Glass / Windshield" },
+  { value: "WINDOWS", label: "Windows" },
+  { value: "LIGHTING", label: "Lighting (Headlight, Taillight)" },
+  { value: "MIRRORS", label: "Mirrors" },
+  { value: "INTERIOR", label: "Interior" },
+  { value: "SEATS", label: "Seats" },
+  { value: "AIRBAGS", label: "Airbags" },
+  { value: "INSTRUMENT_CLUSTER", label: "Instrument Cluster" },
+  { value: "AUDIO_AND_INFOTAINMENT", label: "Audio & Infotainment" },
+  { value: "WIPERS", label: "Wipers" },
+  { value: "SUNROOF", label: "Sunroof" },
+  { value: "TOWING", label: "Towing" },
+  { value: "EV_AND_HYBRID", label: "EV & Hybrid Parts" },
+  { value: "ADAS", label: "ADAS / Safety Sensors" },
+  { value: "HARDWARE", label: "Hardware / Misc" },
 ];
 
 const CONDITION_INFO = {
@@ -67,7 +98,7 @@ export default function NewPartPage() {
       body: JSON.stringify({
         title,
         description,
-        partType: partType.toLowerCase(),
+        partType,
         partNumber: partNumber || undefined,
         conditionGrade,
         conditionNotes: conditionNotes || undefined,
@@ -120,7 +151,7 @@ export default function NewPartPage() {
               >
                 <option value="">Select part type...</option>
                 {PART_TYPES.map((t) => (
-                  <option key={t} value={t}>{t}</option>
+                  <option key={t.value} value={t.value}>{t.label}</option>
                 ))}
               </select>
             </div>
