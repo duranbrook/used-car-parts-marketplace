@@ -73,15 +73,52 @@ export default function NewPartPage() {
   const [donorModel, setDonorModel] = useState("");
   const [donorVin, setDonorVin] = useState("");
 
-  // Image URLs (simplified — real app would have upload)
-  const [imageUrls, setImageUrls] = useState<string[]>([""]);
+  const [images, setImages] = useState<{ file: File; previewUrl: string; publicUrl: string | null; uploading: boolean; error: string | null }[]>([]);
+
+  async function uploadFile(file: File, index: number) {
+    setImages((prev) => prev.map((img, i) => i === index ? { ...img, uploading: true, error: null } : img));
+    try {
+      const res = await fetch("/api/seller/upload-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: file.name, contentType: file.type }),
+      });
+      if (!res.ok) throw new Error("Failed to get upload URL");
+      const { uploadUrl, publicUrl } = await res.json();
+
+      const putRes = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      if (!putRes.ok) throw new Error("Upload to storage failed");
+
+      setImages((prev) => prev.map((img, i) => i === index ? { ...img, publicUrl, uploading: false } : img));
+    } catch (err) {
+      setImages((prev) => prev.map((img, i) => i === index ? { ...img, uploading: false, error: (err as Error).message } : img));
+    }
+  }
+
+  function addFiles(files: FileList | null) {
+    if (!files) return;
+    const newImages = Array.from(files).slice(0, 8 - images.length).map((file) => ({
+      file,
+      previewUrl: URL.createObjectURL(file),
+      publicUrl: null,
+      uploading: false,
+      error: null,
+    }));
+    const startIndex = images.length;
+    setImages((prev) => [...prev, ...newImages]);
+    newImages.forEach((img, i) => uploadFile(img.file, startIndex + i));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const images = imageUrls.filter(Boolean).map((url) => ({ url }));
+    const uploadedImages = images.filter((img) => img.publicUrl).map((img) => ({ url: img.publicUrl! }));
     const donorVehicle =
       donorYear && donorMake && donorModel
         ? {
@@ -105,7 +142,7 @@ export default function NewPartPage() {
         price: parseFloat(price),
         quantity: parseInt(quantity),
         weight: weight ? parseFloat(weight) : undefined,
-        images,
+        images: uploadedImages,
         donorVehicle,
       }),
     });
@@ -325,39 +362,69 @@ export default function NewPartPage() {
           {/* Photos */}
           <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
             <h2 className="text-lg font-semibold text-gray-900">Photos</h2>
-            <p className="text-sm text-gray-600">Add image URLs for your part (file upload coming soon)</p>
+            <p className="text-sm text-gray-600">Upload up to 8 photos. Files upload directly to cloud storage.</p>
 
-            {imageUrls.map((url, i) => (
-              <div key={i} className="flex gap-2">
-                <input
-                  type="url"
-                  value={url}
-                  onChange={(e) => {
-                    const updated = [...imageUrls];
-                    updated[i] = e.target.value;
-                    setImageUrls(updated);
-                  }}
-                  placeholder="https://example.com/photo.jpg"
-                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2"
-                />
-                {imageUrls.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => setImageUrls(imageUrls.filter((_, j) => j !== i))}
-                    className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() => setImageUrls([...imageUrls, ""])}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            {/* Drop zone */}
+            <label
+              className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => { e.preventDefault(); addFiles(e.dataTransfer.files); }}
             >
-              + Add another photo
-            </button>
+              <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+              </svg>
+              <span className="text-sm text-gray-500">Drag & drop photos or <span className="text-blue-600 font-medium">click to browse</span></span>
+              <span className="text-xs text-gray-400 mt-1">JPEG, PNG, WebP — up to 8 photos</span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="hidden"
+                onChange={(e) => addFiles(e.target.files)}
+              />
+            </label>
+
+            {/* Preview grid */}
+            {images.length > 0 && (
+              <div className="grid grid-cols-4 gap-3">
+                {images.map((img, i) => (
+                  <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                    <img src={img.previewUrl} alt="" className="w-full h-full object-cover" />
+                    {/* Upload state overlay */}
+                    {img.uploading && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                    {img.publicUrl && !img.uploading && (
+                      <div className="absolute top-1 right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                    {img.error && (
+                      <div className="absolute inset-0 bg-red-500/80 flex items-center justify-center p-2">
+                        <span className="text-white text-xs text-center">Upload failed</span>
+                      </div>
+                    )}
+                    {i === 0 && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center py-0.5">Primary</div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        URL.revokeObjectURL(img.previewUrl);
+                        setImages((prev) => prev.filter((_, j) => j !== i));
+                      }}
+                      className="absolute top-1 left-1 w-5 h-5 bg-black/50 rounded-full text-white text-xs flex items-center justify-center hover:bg-black/70"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Submit */}
