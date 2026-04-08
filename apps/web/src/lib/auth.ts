@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { cookies } from "next/headers";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -37,6 +38,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   session: { strategy: "jwt" },
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === "google" && user.id) {
+        const cookieStore = await cookies();
+        const intendedRole = cookieStore.get("oauth-intended-role")?.value;
+        if (intendedRole === "SELLER" || intendedRole === "BUYER") {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { role: intendedRole },
+          });
+          (user as { role?: string }).role = intendedRole;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as { role: string }).role;
